@@ -47,9 +47,17 @@ end
 function moveSegment(solucao, inicio, destino, K)
 	n = 0
 	
+	tmp = solucao.caminho[inicio:inicio+K-1]
+
 	while(n < K)				# K é o tamanho da seção   
-		no = splice!(solucao.caminho, inicio)
-		insert!(solucao.caminho, destino, no)
+		splice!(solucao.caminho, inicio)
+		n += 1
+	end
+
+	n = 0
+	
+	while(n < K)
+		insert!(solucao.caminho, destino+n, tmp[n+1])
 		n += 1
 	end
 
