@@ -74,37 +74,44 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 	melhor_custo::Float64= custo_Corrente
 	no_final_A::Int64= 0
 	no_final_B::Int64 = 0
-	
-	for no_A = 2:tamanho-2             
-		for no_B = no_A+1:tamanho-1
 
-			no_A_anterior::Int64 = no_A - 1
-			no_A_seguinte::Int64 = no_A + 1
-			no_B_anterior::Int64 = no_B - 1
-			no_B_seguinte::Int64 = no_B + 1
+	for no_A = 2:tamanho-2
+		no_B::Int64 = no_A + 1
+		no_A_anterior::Int64 = no_A - 1
+		no_A_seguinte::Int64 = no_A + 1
+		no_B_anterior::Int64 = no_B - 1
+		no_B_seguinte::Int64 = no_B + 1
 
-			custo_Removido_A::Float64 = 0
-			custo_Removido_B::Float64 = 0
-			custo_Adicionado_B::Float64 = 0
-			custo_Adicionado_A::Float64 = 0
+		custo_Removido_A::Float64 = distancia[caminho[no_A_anterior], caminho[no_A]]
+		custo_Removido_B::Float64 = distancia[caminho[no_B], caminho[no_B_seguinte]]
+		custo_Adicionado_B::Float64 = distancia[caminho[no_A_anterior], caminho[no_B]]
+		custo_Adicionado_A::Float64 = distancia[caminho[no_A], caminho[no_B_seguinte]]
 
-			if (no_B == no_A + 1)
-				custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]]
-				custo_Removido_B = distancia[caminho[no_B], caminho[no_B_seguinte]]
-				custo_Adicionado_B = distancia[caminho[no_A_anterior], caminho[no_B]]
-				custo_Adicionado_A = distancia[caminho[no_A], caminho[no_B_seguinte]]
+		custo_Removido::Float64 = custo_Removido_A + custo_Removido_B  # Custo original sem a mudança
+		custo_Adicionado::Float64 = custo_Adicionado_B + custo_Adicionado_A # Custo com a inversão de B para A e A para B!
+		custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido
 
-			else
-				custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_A_seguinte]]
-				custo_Removido_B = distancia[caminho[no_B_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_B_seguinte]]
-				custo_Adicionado_B = distancia[caminho[no_A_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_A_seguinte]]
-				custo_Adicionado_A = distancia[caminho[no_B_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_B_seguinte]]
-			
-			end
+		if(custo < melhor_custo)
+			melhor_custo = custo
+			no_final_A = no_A
+			no_final_B = no_B
+		end
 
-			custo_Removido::Float64 = custo_Removido_A + custo_Removido_B  # Custo original sem a mudança
-			custo_Adicionado::Float64 = custo_Adicionado_B + custo_Adicionado_A # Custo com a inversão de B para A e A para B!
-			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido
+		for no_B = no_A+2:tamanho-1
+
+			no_A_anterior = no_A - 1
+			no_A_seguinte = no_A + 1
+			no_B_anterior = no_B - 1
+			no_B_seguinte = no_B + 1
+
+			custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_A_seguinte]]
+			custo_Removido_B = distancia[caminho[no_B_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_B_seguinte]]
+			custo_Adicionado_B = distancia[caminho[no_A_anterior], caminho[no_B]] + distancia[caminho[no_B], caminho[no_A_seguinte]]
+			custo_Adicionado_A = distancia[caminho[no_B_anterior], caminho[no_A]] + distancia[caminho[no_A], caminho[no_B_seguinte]]
+
+			custo_Removido = custo_Removido_A + custo_Removido_B  
+			custo_Adicionado = custo_Adicionado_B + custo_Adicionado_A 
+			custo = custo_Corrente + custo_Adicionado - custo_Removido
 
 			if(custo < melhor_custo)
 				melhor_custo = custo
@@ -113,10 +120,10 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 			end
 		end
 	end
+
 	
 	if(melhor_custo < custo_Corrente)
-
-		@time swapVertices(solucao, no_final_A, no_final_B)
+		swapVertices(solucao, no_final_A, no_final_B)
 		return true
 	end
 
@@ -181,43 +188,46 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 	melhor_Destino::Int64 = 0 					#---dúvida
 
 	for origem =2:length(caminho)-K
-		for destino = 2:length(caminho)-K
 
-			if (origem == destino)
-				continue
+		custo_Adicionado::Float64 = 0
+		custo_Removido::Float64 = 0 
+		custo_Adicionado_1::Float64 = 0
+		custo_Adicionado_2::Float64 = 0 
+		custo_Adicionado_3::Float64 = 0
+		custo::Float64 = 0 
+
+		for destino = 2:origem-1
+
+			custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + 
+			distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
+			
+			custo_Adicionado_1 =  distancia[caminho[destino-1], caminho[origem]]    
+			custo_Adicionado_2 =  distancia[caminho[origem+K-1], caminho[destino]]
+			custo_Adicionado_3 =  distancia[caminho[origem-1], caminho[origem+K]]
+			
+			custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
+			
+			custo = custo_Corrente + custo_Adicionado - custo_Removido
+
+			if(custo < melhor_custo)
+				melhor_custo = custo
+				melhor_Inicio = origem
+				melhor_Destino = destino
 			end
+		end
 
-			custo_Adicionado::Float64 = 0
-			custo_Removido::Float64 = 0
-			# Declarar as variáveis fora do laço -1,2,3	
-			custo_Adicionado_1::Float64
-			custo_Adicionado_2::Float64
-			custo_Adicionado_3::Float64
+		for destino = origem+1:length(caminho)-K
 
+			custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + 
+			distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino+K-1], caminho[destino+K]]
 
-			if origem < destino
-				custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + 
-				distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino+K-1], caminho[destino+K]]
+			custo_Adicionado_1 =  distancia[caminho[origem-1], caminho[origem+K]]
+			custo_Adicionado_2 =  distancia[caminho[destino+K-1], caminho[origem]]      
+			custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+K]]   
 
-				custo_Adicionado_1 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado
-				custo_Adicionado_2 =  distancia[caminho[destino+K-1], caminho[origem]]          # validado  
-				custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+K]]     # validado
+			custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
 
-				custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
-
-			else
-				custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + 
-				distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
-				
-				custo_Adicionado_1 =  distancia[caminho[destino-1], caminho[origem]]        # validado
-				custo_Adicionado_2 =  distancia[caminho[origem+K-1], caminho[destino]]      # validado
-				custo_Adicionado_3 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado. Estava errado anteriormente. O erro era no segundo indice e o correto é caminho[noInicio+k] e não +1
-
-				custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
-			end
-
-			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido
-
+			custo = custo_Corrente + custo_Adicionado - custo_Removido
 
 			if(custo < melhor_custo)
 				melhor_custo = custo
@@ -347,7 +357,7 @@ function ILS(distancias::Array{Float64,2}, maxIter::Int64, maxIter_localsearch::
             #println("CUSTO BESTOFFALL: ", bestOfAll.custo)
 
 		end
-        println("CUSTO BEST.CUSTO: ", best.custo)
+        #println("CUSTO BEST.CUSTO: ", best.custo)
 	end
     #println("Caminho final é: ", bestOfAll)
 	return bestOfAll
