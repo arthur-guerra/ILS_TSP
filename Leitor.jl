@@ -18,10 +18,10 @@ mutable struct InstanceData
 	InstanceData() = new("", "", 0, "", "")				# Para instanciar um objeto do tipo InstanceInfo
 end
 
-function readFile(filePath)
+function readFile(filePath::String)::Array{Float64,2}
 	
-	instanceData = InstanceData()
-	matrix = []
+	instanceData::InstanceData = InstanceData()
+	matrix::Array{Float64,2} = Array{Float64,2}(undef, 0, 0)
 
 	#Abre o arquivo e começa a trabalhar com ele                
 	open(filePath) do file         # att48 # burma14
@@ -45,16 +45,16 @@ function readFile(filePath)
 end
 
 
-function readHeader(file, instanceData)
+function readHeader(file::IOStream, instanceData::InstanceData)
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		
 		if (occursin("TYPE", line) && !occursin("_", line))
 			instanceData.type = line[findlast(isequal(' '), line) + 1:end]
 		elseif (occursin("DIMENSION", line)) #Se a linha conter "DIMENSION", pega a dimensão
-			dim = line[findlast(isequal(' '), line) + 1:end]
+			dim::String = line[findlast(isequal(' '), line) + 1:end]
 			instanceData.dimension = parse(Int64, dim)
 		elseif (occursin("EDGE_WEIGHT_TYPE", line)) #Se a linha conter "EDGE_WEIGHT_TYPE", pega a dimensão
 			instanceData.edgeWeightType = line[findlast(isequal(' '), line) + 1:end]
@@ -66,12 +66,12 @@ function readHeader(file, instanceData)
 end
 
 
-function readNodeCoord(file, instanceData)
+function readNodeCoord(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
 
-	data = []
+	data::Vector{Point} = Vector{Point}(undef, 0)
 
 	while !eof(file)
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		
 		if (occursin("NODE_COORD_SECTION", line))
 			break
@@ -80,13 +80,13 @@ function readNodeCoord(file, instanceData)
 
 	while !eof(file)
 
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		
 		#Quebra a linha onde tiver espaço
-		numbers = split(line, " ")
-		filter!(value -> value != "", numbers)
+		numbers::Vector{String} = split(line, " ")
+		filter!(value::String -> value != "", numbers)
 
-		point = Point(
+		point::Point = Point(
 			parse(Int64, numbers[1]),
 			parse(Float64, numbers[2]),
 			parse(Float64, numbers[3])
@@ -106,11 +106,11 @@ function readNodeCoord(file, instanceData)
 end
 
 
-function readEdgeWeight(file, instanceData)
+function readEdgeWeight(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		#println(line)
 		
 		if (occursin("EDGE_WEIGHT_FORMAT", line))
@@ -157,21 +157,21 @@ end
 # 	return array
 # end
 
-function distanceExplicitFullMatrix(file, instanceData)
+function distanceExplicitFullMatrix(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
 
-	matrix = zeros(Float64, instanceData.dimension, instanceData.dimension)
-	lineCounter = 0
+	matrix::Array{Float64,2}= zeros(Float64, instanceData.dimension, instanceData.dimension)
+	lineCounter::Int64 = 0
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		lineCounter += 1
 		
-		distArray = split(line, " ")
-		filter!(value -> value != "", distArray)
+		distArray::Vector{String} = split(line, " ")
+		filter!(value::String -> value != "", distArray)
 
 		for i = 1 : instanceData.dimension
-			value = parse(Float64, distArray[i])
+			value::Float64 = parse(Float64, distArray[i])
 			matrix[lineCounter, i] = value
 		end
 
@@ -211,21 +211,21 @@ end
 # matrix[4, 3] = distArray[1] = 162
 
 
-function distanceExplicitUpperRow(file, instanceData)
+function distanceExplicitUpperRow(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
 
-	matrix = zeros(Float64, instanceData.dimension, instanceData.dimension)
-	lineCounter = 0
+	matrix::Array{Float64,2} = zeros(Float64, instanceData.dimension, instanceData.dimension)
+	lineCounter::Int64 = 0
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		lineCounter += 1
 		
-		distArray = split(line, " ")
-		filter!(value -> value != "", distArray)
+		distArray::Vector{String} = split(line, " ")
+		filter!(value::String -> value != "", distArray)
 
 		for i = lineCounter+1 : instanceData.dimension
-			value = parse(Float64, distArray[i-lineCounter])
+			value::Float64 = parse(Float64, distArray[i-lineCounter])
 			matrix[lineCounter, i] = value
 			matrix[i, lineCounter] = value
 		end
@@ -237,15 +237,15 @@ function distanceExplicitUpperRow(file, instanceData)
 end
 
 
-function distanceExplicitLowerDiagRow(file, instanceData)
+function distanceExplicitLowerDiagRow(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
 
-	matrix = zeros(Float64, instanceData.dimension, instanceData.dimension)
-	lineCounter = 0
-	rowArray = [""]
+	matrix::Array{Float64,2} = zeros(Float64, instanceData.dimension, instanceData.dimension)
+	lineCounter::Int64 = 0
+	rowArray::Vector{String} = [""]
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		
 		line = string(rowArray[end], " ", line)
 		rowArray = split(line, " 0") 
@@ -255,13 +255,13 @@ function distanceExplicitLowerDiagRow(file, instanceData)
 
 		for j = 1:length(rowArray) - 1	
 			
-			distArray = split(rowArray[j], " ")
-			filter!(value -> value != "", distArray)
+			distArray::Vector{String} = split(rowArray[j], " ")
+			filter!(value::String -> value != "", distArray)
 
 			lineCounter += 1
 
 			for i = 1 : length(distArray)
-				value = parse(Float64, distArray[i])
+				value::Float64 = parse(Float64, distArray[i])   # --- VALIDAR
 				matrix[lineCounter, i] = value
 				matrix[i, lineCounter] = value
 			end
@@ -275,15 +275,15 @@ function distanceExplicitLowerDiagRow(file, instanceData)
 	end
 end
 
-function distanceExplicitUpperDiagRow(file, instanceData)
-	matrix = zeros(Float64, instanceData.dimension, instanceData.dimension)
-	lineCounter = 0
-	rowArray = [""]
-	ignoreLast = 1
+function distanceExplicitUpperDiagRow(file::IOStream, instanceData::InstanceData)::Array{Float64,2}
+	matrix::Array{Float64,2} = zeros(Float64, instanceData.dimension, instanceData.dimension)
+	lineCounter::Int64 = 0
+	rowArray::Vector{String}= [""]
+	ignoreLast::Int64 = 1
 
 	while !eof(file) #Trabalha com o arquivo até chegar no fim
 		
-		line = readline(file) #Lê a linha
+		line::String = readline(file) #Lê a linha
 		
 		line = string(rowArray[end], " ", line)
 		rowArray = split(line, " 0") 
@@ -297,8 +297,8 @@ function distanceExplicitUpperDiagRow(file, instanceData)
 
 		for j = 1:length(rowArray) - ignoreLast
 
-			distArray = split(rowArray[j], " ")
-			filter!(value -> value != "", distArray)
+			distArray::Vector{String} = split(rowArray[j], " ")
+			filter!(value::String -> value != "", distArray)
 			
 			if isempty(distArray)
 				continue
@@ -307,7 +307,7 @@ function distanceExplicitUpperDiagRow(file, instanceData)
 
 			for i = lineCounter+1 : length(distArray)
 
-				value = parse(Float64, distArray[i-lineCounter])
+				value::Float64 = parse(Float64, distArray[i-lineCounter])
 				matrix[lineCounter, i] = value
 				matrix[i, lineCounter] = value
 			end
@@ -323,12 +323,18 @@ end
 
 
 #Calcula as distâncias conforme o tipo da instância
-function distancia(dim, data, type)
+function distancia(dim::Int64, data, type::String)	## tipo do retorno d
+
+		# dim é Int64 
+		# data ???????
+		# d é o que ????
+		# type é String
 
 		#println("Dim: ", dim)
 		#println("Data: ", data)
 		#println("Type: ", type)
-	d = zeros(Float64, dim, dim)
+
+	d= zeros(Float64, dim, dim)
 
 	if (type == "EUC_2D")
 		for i in 1:dim
@@ -380,10 +386,7 @@ function distancia(dim, data, type)
 		end
 
 		
-	
 	elseif (type == "GEO")
-
-		
 
 		latitude = zeros(Float64, dim)
 		longitude = zeros(Float64, dim)

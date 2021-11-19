@@ -9,7 +9,7 @@ struct Result
   tempo::Float64
 end
 
-function writeFile(filePath, results, delimiter)
+function writeFile(filePath, results, delimiter)   ## ----------- VERIFICAR
 
   #Abre o arquivo e começa a trabalhar com ele                
   open(filePath, "w") do file         # att48 # burma14

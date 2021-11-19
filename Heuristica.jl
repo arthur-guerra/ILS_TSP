@@ -1,6 +1,6 @@
 module Heuristica
 
-using Solution
+using Solution, Profile
 export ILS, iteracoes_ILS
 
 struct InsertionInfo
@@ -9,87 +9,84 @@ struct InsertionInfo
 	custo::Float64
 end
 
-function Construcao(distancia)      
+function Construcao(distancia::Array{Float64,2})::Solucao      #o retorno é solução.  Qual tipo?
 
-	caminho =[]
-	(linha_dist, coluna_dist) = size(distancia)
+	caminho::Vector{Int64} = Vector{Int64}(undef, 0)
+	linha_dist::Int64 = size(distancia, 1)
 
-	nao_selecionado = collect(1:linha_dist)
+	nao_selecionado::Vector{Int64} = collect(1:linha_dist)		 ## ---dúvida
 
 	for i=1:3
-		a = rand(1:length(nao_selecionado))
+		a::Int64 = rand(1:length(nao_selecionado))
 		caminho = push!(caminho, nao_selecionado[a])
 		splice!(nao_selecionado, a)
 	end
 
 	while !isempty(nao_selecionado)  
-		vetor_aleat = []
+		vetor_aleat::Vector{InsertionInfo} = Vector{InsertionInfo}(undef, 0)	# ---dúvida
 
 		for node_k in nao_selecionado                   # Forma alternativa de estruturar o for, o conjunto k vai reduzindo
 			for i=1:length(caminho)                     # O conjunto caminho vai aumentando
 				
-				node_i = caminho[i]                 #node/valor_k => valor da posição
-				j = i % length(caminho) + 1         #_Guarda a posição. O % pega o resto do valor, e.g. 1/3 => resto = 1, o último vai ser 0+1
-				node_j = caminho[j]                 
+				node_i::Int64 = caminho[i]                 #node/valor_k => valor da posição
+				j::Int64 = i % length(caminho) + 1         #_Guarda a posição. O % pega o resto do valor, e.g. 1/3 => resto = 1, o último vai ser 0+1
+				node_j::Int64 = caminho[j]                 
 				#node_k = nao_selecionado[k]        #_Não existe nessa estrutura
 
-				dist_ik = distancia[node_i, node_k]
-				dist_kj = distancia[node_k, node_j]
-				dist_ij = distancia[node_i, node_j]   
+				dist_ik::Float64 = distancia[node_i, node_k]
+				dist_kj::Float64 = distancia[node_k, node_j]
+				dist_ij::Float64 = distancia[node_i, node_j]   
 
-				somatorio_ijk = dist_ik + dist_kj - dist_ij
+				somatorio_ijk::Float64 = dist_ik + dist_kj - dist_ij
 
-				soma_Troca = InsertionInfo(node_k, j, somatorio_ijk)
+				soma_Troca::InsertionInfo = InsertionInfo(node_k, j, somatorio_ijk)
 				push!(vetor_aleat, soma_Troca)
 			end
 		end
 	
 		sort!(vetor_aleat, by = elem -> elem.custo)   # Ordena do menor para o maior, pela posição do variável custo
 		
-		lenght_vetor_aleatoria = length(vetor_aleat)
-		lenght_metade_aleat = ceil(Int, lenght_vetor_aleatoria/2)               # Metade do vetor ordenado, se for valor quebrado, arredonda pra cima
+		length_metade_aleat::Int64= ceil(Int, (length(vetor_aleat))/2)   ## ---dúvida
 
-		size_vetor_aleat = length(vetor_aleat)              # Esse talvez não seja necessário
-		size_metade_aleat = ceil(Int, (length(vetor_aleat))/2)   
+		b::Int64= rand(1:length_metade_aleat)       # Metade do vetor ordenado, se for valor quebrado, arredonda pra cima
 
-		b = rand(1:lenght_metade_aleat)                                         # Metade do vetor ordenado, se for valor quebrado, arredonda pra cima
-
-		escolha_aleatoria = vetor_aleat[b]            # Um dos valores dos 50% melhor
+		escolha_aleatoria::InsertionInfo = vetor_aleat[b]            # Um dos valores dos 50% melhor
 	
 		insert!(caminho, escolha_aleatoria.posicaoInsercao, escolha_aleatoria.noInserido)
 		setdiff!(nao_selecionado, caminho)		
 	end
 
 	push!(caminho, caminho[1])
-	solucao = Solucao(caminho, distancia)   # seria o caso com dois parametros que retornam 3 no caso, se eu printar "solucao" 
+	solucao::Solucao = Solucao(caminho, distancia)   # seria o caso com dois parametros que retornam 3 no caso, se eu printar "solucao" 
 											# Nesse objeto, será chamado a função custocaminho
     #println("Solucao dentro da Construção: ", solucao)
 	return solucao
 end
 
-function swap(solucao)  # Função de troca de posição
+function swap(solucao::Solucao)::Bool  # Função de troca de posição
 
-	caminho = solucao.caminho        
-	distancia = solucao.dist       
-	custo_Corrente = solucao.custo
+	caminho::Vector{Int64} = solucao.caminho        
+	distancia::Array{Float64, 2}= solucao.dist        		
+	custo_Corrente::Float64 = solucao.custo   
 	
-	tamanho = size(caminho, 1)
-	melhor_custo = custo_Corrente
-	no_final_A = 0
-	no_final_B = 0
+	tamanho::Int64 = length(caminho)
+
+	melhor_custo::Float64= custo_Corrente
+	no_final_A::Int64= 0
+	no_final_B::Int64 = 0
 	
-	for no_A = 2:tamanho-2              #(CORRIGIR)
+	for no_A = 2:tamanho-2             
 		for no_B = no_A+1:tamanho-1
 
-			no_A_anterior = no_A - 1
-			no_A_seguinte = no_A + 1
-			no_B_anterior = no_B - 1
-			no_B_seguinte = no_B + 1
+			no_A_anterior::Int64 = no_A - 1
+			no_A_seguinte::Int64 = no_A + 1
+			no_B_anterior::Int64 = no_B - 1
+			no_B_seguinte::Int64 = no_B + 1
 
-			custo_Removido_A = 0
-			custo_Removido_B = 0
-			custo_Adicionado_B = 0
-			custo_Adicionado_A = 0
+			custo_Removido_A::Float64 = 0
+			custo_Removido_B::Float64 = 0
+			custo_Adicionado_B::Float64 = 0
+			custo_Adicionado_A::Float64 = 0
 
 			if (no_B == no_A + 1)
 				custo_Removido_A = distancia[caminho[no_A_anterior], caminho[no_A]]
@@ -105,12 +102,9 @@ function swap(solucao)  # Função de troca de posição
 			
 			end
 
-			custo_Removido = custo_Removido_A + custo_Removido_B  # Custo original sem a mudança
-			custo_Adicionado = custo_Adicionado_B + custo_Adicionado_A # Custo com a inversão de B para A e A para B!
-			custo = custo_Corrente + custo_Adicionado - custo_Removido
-
-			caminho_no_A  = caminho[no_A]
-			caminho_no_B  = caminho[no_B]
+			custo_Removido::Float64 = custo_Removido_A + custo_Removido_B  # Custo original sem a mudança
+			custo_Adicionado::Float64 = custo_Adicionado_B + custo_Adicionado_A # Custo com a inversão de B para A e A para B!
+			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido
 
 			if(custo < melhor_custo)
 				melhor_custo = custo
@@ -122,28 +116,30 @@ function swap(solucao)  # Função de troca de posição
 	
 	if(melhor_custo < custo_Corrente)
 
-		swapVertices(solucao, no_final_A, no_final_B)
+		@time swapVertices(solucao, no_final_A, no_final_B)
 		return true
 	end
 
 	return false    
 end
 
-function busca_2opt(solucao)
+function busca_2opt(solucao::Solucao)::Bool
 
-	caminho = solucao.caminho
-	distancia = solucao.dist
-	custo_Corrente = solucao.custo
-	melhor_custo = custo_Corrente 
+	caminho::Vector{Int64} = solucao.caminho		
+	distancia::Array{Float64, 2} = solucao.dist		
+	custo_Corrente::Float64 = solucao.custo	
+	melhor_custo::Float64 = custo_Corrente 	
 
-	p1 = 0 
-	p2 = 0 
+	p1::Int64 = 0 
+	p2::Int64 = 0 
+
+	# 
 
 	for node_inicial =2:length(caminho)-1 
 		for node_final = node_inicial+1:length(caminho)-1 
 
-			custo_Adicionado = 0 
-			custo_Removido = 0 
+			custo_Adicionado::Float64 = 0 
+			custo_Removido::Float64 = 0 
 		
 			for n = node_inicial:node_final+1 
 				custo_Removido += distancia[caminho[n-1],caminho[n]] 
@@ -152,14 +148,12 @@ function busca_2opt(solucao)
 			for n = node_inicial+1:node_final							   # Nesse caso tem a "inversão" 
 				custo_Adicionado += distancia[caminho[n],caminho[n-1]] 
 
-				x = caminho[n-1] 
-				y = caminho[n] 
 			end 
 
 			custo_Adicionado += distancia[caminho[node_inicial],caminho[node_final+1]] # Calculo do extremo inicial 
 			custo_Adicionado += distancia[caminho[node_inicial-1],caminho[node_final]] # Calculo do extremo final 
 
-			custo = custo_Corrente + custo_Adicionado - custo_Removido 
+			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido 
 
 			if(custo < melhor_custo) 
 				p1 = node_inicial 
@@ -177,53 +171,58 @@ function busca_2opt(solucao)
 	return false 
 end 
 
-function orOpt(solucao, K)    # K é o tamanho da seção (1, 2 ou 3) 
+function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção (1, 2 ou 3) 
 
-	caminho = solucao.caminho
-	distancia = solucao.dist
-	custo_Corrente = solucao.custo
-	melhor_custo = custo_Corrente
-	melhor_Inicio = 0
-	melhor_Destino = 0 
+	caminho::Vector{Int64} = solucao.caminho			#---dúvida
+	distancia::Array{Float64, 2} = solucao.dist			#---dúvida
+	custo_Corrente::Float64 = solucao.custo		#---dúvida
+	melhor_custo::Float64 = custo_Corrente		#---dúvida
+	melhor_Inicio::Int64 = 0					#---dúvida	
+	melhor_Destino::Int64 = 0 					#---dúvida
 
 	for origem =2:length(caminho)-K
 		for destino = 2:length(caminho)-K
 
-			if (!(origem - 1 <= destino && destino < origem + K)) #lembrar de ajustar
+			if (origem == destino)
+				continue
+			end
 
-				custo_Adicionado = 0
-				custo_Removido = 0
-
-
-				if origem < destino
-					custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + 
-					distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino+K-1], caminho[destino+K]]
-
-					custo_Adicionado_1 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado
-					custo_Adicionado_2 =  distancia[caminho[destino+K-1], caminho[origem]]          # validado  
-					custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+K]]     # validado
-
-					custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
-
-				else
-					custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + 
-					distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
-					
-					custo_Adicionado_1 =  distancia[caminho[destino-1], caminho[origem]]        # validado
-					custo_Adicionado_2 =  distancia[caminho[origem+K-1], caminho[destino]]      # validado
-					custo_Adicionado_3 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado. Estava errado anteriormente. O erro era no segundo indice e o correto é caminho[noInicio+k] e não +1
-
-					custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
-				end
-
-				custo = custo_Corrente + custo_Adicionado - custo_Removido
+			custo_Adicionado::Float64 = 0
+			custo_Removido::Float64 = 0
+			# Declarar as variáveis fora do laço -1,2,3	
+			custo_Adicionado_1::Float64
+			custo_Adicionado_2::Float64
+			custo_Adicionado_3::Float64
 
 
-				if(custo < melhor_custo)
-					melhor_custo = custo
-					melhor_Inicio = origem
-					melhor_Destino = destino
-				end
+			if origem < destino
+				custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + 
+				distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino+K-1], caminho[destino+K]]
+
+				custo_Adicionado_1 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado
+				custo_Adicionado_2 =  distancia[caminho[destino+K-1], caminho[origem]]          # validado  
+				custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+K]]     # validado
+
+				custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
+
+			else
+				custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + 
+				distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
+				
+				custo_Adicionado_1 =  distancia[caminho[destino-1], caminho[origem]]        # validado
+				custo_Adicionado_2 =  distancia[caminho[origem+K-1], caminho[destino]]      # validado
+				custo_Adicionado_3 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado. Estava errado anteriormente. O erro era no segundo indice e o correto é caminho[noInicio+k] e não +1
+
+				custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
+			end
+
+			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido
+
+
+			if(custo < melhor_custo)
+				melhor_custo = custo
+				melhor_Inicio = origem
+				melhor_Destino = destino
 			end
 		end
 	end
@@ -238,15 +237,18 @@ function orOpt(solucao, K)    # K é o tamanho da seção (1, 2 ou 3)
 	
 end    
 
-function perturbacao(solucao)                  # Perturbar levemente a solução da busca Local
+function perturbacao(solucao::Solucao)::Solucao                  # Perturbar levemente a solução da busca Local
 
-	nova_solucao = copySolution(solucao)
-	caminho = nova_solucao.caminho				# Nesse caso, aponta para o mesmo objeto
-	tamanho_caminho = length(caminho)
+	nova_solucao::Solucao = copySolution(solucao)
+	caminho::Vector{Int64} = nova_solucao.caminho				# Nesse caso, aponta para o mesmo objeto
+	tamanho_caminho::Int64 = length(caminho)
 
 	if tamanho_caminho < 6              # Abaixo de 6, o código não é valido
 		return nova_solucao
 	end
+
+	K1::Int64 = 0
+	K2::Int64 = 0
 
 	if tamanho_caminho < 20
 		K1 = 2
@@ -256,10 +258,10 @@ function perturbacao(solucao)                  # Perturbar levemente a solução
 		K2 = rand(2:round(Int, tamanho_caminho/10))
 	end
 
-	p1 = rand(2:tamanho_caminho-(K1+K2))
-	p2 = p1 + K1 - 1
-	p3 = rand(p2+1:tamanho_caminho-(K2))
-	p4 = p3 + K2 - 1
+	p1::Int64 = rand(2:tamanho_caminho-(K1+K2))
+	p2::Int64 = p1 + K1 - 1
+	p3::Int64 = rand(p2+1:tamanho_caminho-(K2))
+	p4::Int64 = p3 + K2 - 1
 
 	swapSegments(nova_solucao, p1, p2, p3, p4)
 
@@ -267,15 +269,15 @@ function perturbacao(solucao)                  # Perturbar levemente a solução
 
 end
 
-function Buscalocal(solucao)        # Consolidação dos movimentos e do algoritmo em si!
+function Buscalocal(solucao::Solucao)::Bool    #---dúvida (Verificar se o retorno de fato é assim)    # Consolidação dos movimentos e do algoritmo em si!
 
-	vetor = [1,2,3,4,5]
+	vetor::Vector{Int64} = [1,2,3,4,5]
 
-	improvement = false
+	improvement::Bool = false
 
 	while !isempty(vetor)
 
-		a = rand(1:length(vetor))
+		a::Int64 = rand(1:length(vetor))
 
 		if vetor[a] == 1
 			improvement = swap(solucao)
@@ -293,7 +295,7 @@ function Buscalocal(solucao)        # Consolidação dos movimentos e do algorit
 			improvement = orOpt(solucao, 3)
 		end
 
-		if improvement == true
+		if improvement
 			vetor = [1,2,3,4,5]
 		else
 			splice!(vetor, a)
@@ -304,9 +306,9 @@ function Buscalocal(solucao)        # Consolidação dos movimentos e do algorit
 	return improvement
 end
 
-function ILS(distancias, maxIter, maxIterIls)
+function ILS(distancias::Array{Float64,2}, maxIter::Int64, maxIter_localsearch::Int64)::Solucao
 
-	bestOfAll = Solucao(distancias)		# Isso seria dispensável ? Se eu colocasse aqui diretamente o objeto com o valor Inf pela possibilidade de tratar como float
+	bestOfAll::Solucao = Solucao(distancias)		# Isso seria dispensável ? Se eu colocasse aqui diretamente o objeto com o valor Inf pela possibilidade de tratar como float
 	
     #println("CUSTO inicial: ", bestOfAll.custo)
 
@@ -314,15 +316,15 @@ function ILS(distancias, maxIter, maxIterIls)
 
 	for i = 1:maxIter 
 		
-		solucao = Construcao(distancias)	# gera um caminho inicial que será utilizado na busca local
-		best = copySolution(solucao)			# copia o vetor da solução, e o "deepcopy" para mudar o objeto que tá sendo apontado
+		solucao::Solucao = Construcao(distancias)	##---dúvida        # gera um caminho inicial que será utilizado na busca local
+		best::Solucao = copySolution(solucao)			# copia o vetor da solução, e o "deepcopy" para mudar o objeto que tá sendo apontado
         
         #println("Solucao teste: ", solucao)
         #println("best: ", best)
 
-		iterIls = 1						# 1 : número máximo de interações
+		iterIls::Int64 = 1						# 1 : número máximo de interações
 		
-		while iterIls <= maxIterIls
+		while iterIls <= maxIter_localsearch
 			
 			Buscalocal(solucao)
 			
@@ -331,7 +333,6 @@ function ILS(distancias, maxIter, maxIterIls)
 				iterIls = 1						# se for encontrado uma melhor solução do que atual, reinicia o LOOP	
 			end
 			
-        
             #println("CUSTO TESTE: ", best.custo)
 
 			solucao = perturbacao(best)			# aplica a perturbacao no best e roda mais um laço do while
@@ -354,17 +355,15 @@ function ILS(distancias, maxIter, maxIterIls)
 end
 
 
-function iteracoes_ILS(distancias)
+function iteracoes_ILS(distancias::Array{Float64,2})::Int64
     
-    (linhas, colunas) = size(distancias)
+    linhas::Int64 = size(distancias, 1)  ## ---dúvida
 
     if linhas >= 150
-        maxIterIls = linhas/2		# AJEITAR PRA ARREDONDAR
-    else
-        maxIterIls = linhas
+		return ceil(Int, linhas/2)									
     end
     
-    return maxIterIls
+	return linhas
 end
 
 end

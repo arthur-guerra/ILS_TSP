@@ -22,7 +22,7 @@ function Base.println(instance::InstanceInfo)
 	println("Dimension: ", instance.dimension)
 end
 
-function extractFile(filePath)
+function extractFile(filePath)  ## --- dúvida 
 
 	instanceInfo = InstanceInfo()
 	instanceInfo.fileName = filePath
@@ -31,7 +31,7 @@ function extractFile(filePath)
 	open(filePath) do file    
 		     
 		while !eof(file)
-			line = readline(file) 	
+			line::String = readline(file) 	
 
 	
 			#até o fim do arquivoj
