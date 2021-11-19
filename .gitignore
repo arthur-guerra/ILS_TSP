@@ -1,4 +1,5 @@
 Anotations.jl
 Anotations.zip
+.vscode/**
 *.csv
 !instancias.csv

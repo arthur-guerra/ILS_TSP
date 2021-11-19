@@ -187,25 +187,27 @@ function orOpt(solucao, K)    # K é o tamanho da seção (1, 2 ou 3)
 	melhor_Destino = 0 
 
 	for origem =2:length(caminho)-K
-		for destino = 2:length(caminho)-1
+		for destino = 2:length(caminho)-K
 
-			if (!(origem - 1 <= destino && destino < origem + K))
+			if (!(origem - 1 <= destino && destino < origem + K)) #lembrar de ajustar
 
 				custo_Adicionado = 0
 				custo_Removido = 0
 
 
 				if origem < destino
-					custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino], caminho[destino+1]]
+					custo_Removido =    distancia[caminho[origem-1], caminho[origem]] + 
+					distancia[caminho[origem+K-1], caminho[origem+K]] +  distancia[caminho[destino+K-1], caminho[destino+K]]
 
 					custo_Adicionado_1 =  distancia[caminho[origem-1], caminho[origem+K]]       # validado
-					custo_Adicionado_2 =  distancia[caminho[destino], caminho[origem]]          # validado  
-					custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+1]]     # validado
+					custo_Adicionado_2 =  distancia[caminho[destino+K-1], caminho[origem]]          # validado  
+					custo_Adicionado_3 = distancia[caminho[origem+K-1], caminho[destino+K]]     # validado
 
 					custo_Adicionado = custo_Adicionado_1 + custo_Adicionado_2 + custo_Adicionado_3
 
 				else
-					custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
+					custo_Removido =   distancia[caminho[destino-1], caminho[destino]] + 
+					distancia[caminho[origem-1], caminho[origem]] +  distancia[caminho[origem+K-1], caminho[origem+K]]
 					
 					custo_Adicionado_1 =  distancia[caminho[destino-1], caminho[origem]]        # validado
 					custo_Adicionado_2 =  distancia[caminho[origem+K-1], caminho[destino]]      # validado
@@ -215,6 +217,7 @@ function orOpt(solucao, K)    # K é o tamanho da seção (1, 2 ou 3)
 				end
 
 				custo = custo_Corrente + custo_Adicionado - custo_Removido
+
 
 				if(custo < melhor_custo)
 					melhor_custo = custo
@@ -343,7 +346,7 @@ function ILS(distancias, maxIter, maxIterIls)
             #println("CUSTO BESTOFFALL: ", bestOfAll.custo)
 
 		end
-        println("CUSTO BESTOFFALL: ", best.custo)
+        println("CUSTO BEST.CUSTO: ", best.custo)
 	end
     #println("Caminho final é: ", bestOfAll)
 	return bestOfAll
