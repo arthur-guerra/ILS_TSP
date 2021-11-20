@@ -14,8 +14,6 @@ function filterInstances()
 		#println(instances[length(instances)].name)
 	end
 
-
-
 	i = 1
 	cont = 0
 	open("instancias.csv") do file         
@@ -69,7 +67,7 @@ end
 function runInstances()
   
 	instances = filterInstances()
-	ok = [5, 8]
+	ok = [3]
 	resultados = []
   
 	i = 0
@@ -81,12 +79,12 @@ function runInstances()
 		continue
 	  end
   
-	  matrix = readFile(instance.fileName)
+	  matrix::Array{Float64,2} = readFile(instance.fileName)
   
 	  println(instance.name)
 	  
-	  for k = 1:10
-		individualTime = @elapsed solution = ILS(matrix, 50, iteracoes_ILS(matrix))
+	  for k = 1:30
+		individualTime = @elapsed solution::Solucao= ILS(matrix, 50, iteracoes_ILS(matrix))
 		println("Custo: ", solution.custo, " Tempo: ", round.(individualTime, digits=3), " s")
 		push!(resultados, Result(instance.name, k, solution.custo, individualTime))
 		println("Solucao: ", solution.custo)
