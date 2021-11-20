@@ -46,20 +46,54 @@ end
 # orOpt
 function moveSegment(solucao::Solucao, inicio::Int64, destino::Int64, K::Int64)
 	
-	n::Int64 = 0
+# [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+# inicio = 4
+# destino = 13
+# K = 3
+
+#tmp = [4, 5, 6]
+
+# for 1 => 4+3:13+4-1 => 7:16
+	#  4 <- 7
+	#  5 <- 8
+	# 13 <- 16
+
+
+# [1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, [4, 5, 6], 16, 17, 18, 19, 20]
+
+# inicio = 13
+# destino = 4
+# K = 3
+
+#tmp = [13, 14, 15]
+		# 15 <- 12
+		# 14 <- 11
+		# 7  <- 4
+
+# [1, 2, 3, [13, 14, 15], 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17, 18, 19, 20]
 	
 	tmp::Vector{Int64} = solucao.caminho[inicio:inicio+K-1]
+	signal::Int64 = sign(destino - inicio)
+	zero_um = min(signal, 0)
 
-	while(n < K)				# K é o tamanho da seção   
-		splice!(solucao.caminho, inicio)
-		n += 1
+	for i = inicio + zero_um: signal :destino
+		solucao.caminho[i - zero_um * K] = solucao.caminho[i+(1 + zero_um) * K]
 	end
-
-	n = 0
 	
-	while(n < K)
-		insert!(solucao.caminho, destino+n, tmp[n+1])
-		n += 1
+
+	#=if inicio < destino
+		for i = inicio:destino
+			solucao.caminho[i] = solucao.caminho[i+K]
+		end
+	else
+		for i = inicio-1:-1:destino
+			solucao.caminho[i+K] = solucao.caminho[i]
+		end
+	end=#
+
+	for i = 0:K-1
+		solucao.caminho[destino+i] = tmp[i+1]
 	end
 
 	atualizaCusto(solucao)
