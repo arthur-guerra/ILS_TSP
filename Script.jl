@@ -62,28 +62,48 @@ function edge_tsp()
 
 end
 
+
 #edge_tsp()
+function Simetria(matrix::Array{Float64,2})
+
+	(linhas, colunas) = size(matrix)
+
+	for i = 1:linhas-1
+		for j = i+1:colunas
+			if abs(matrix[i,j]-matrix[j,i])>0.001
+				#println("Indice i e Indice J: ", i, "-", j)
+				return false
+			end
+		end
+	end
+	return true
+end
 
 function runInstances()
   
 	instances = filterInstances()
-	ok = [3]
+	ok = [1]
 	resultados = []
   
 	i = 0
 	for instance in instances
   
 	  i += 1
-  
+
 	  if i ∉ ok
 		continue
 	  end
   
-	  matrix::Array{Float64,2} = readFile(instance.fileName)
+	matrix::Array{Float64,2} = readFile(instance.fileName)
   
 	  println(instance.name)
 	  
-	  for k = 1:30
+	  #=if !Simetria(matrix)  # retornar se for assimétrico
+		println(instance.name)
+		#pretty_table(matrix)
+	  end=#
+
+	  for k = 1:1
 		individualTime = @elapsed solution::Solucao= ILS(matrix, 50, iteracoes_ILS(matrix))
 		println("Custo: ", solution.custo, " Tempo: ", round.(individualTime, digits=3), " s")
 		push!(resultados, Result(instance.name, k, solution.custo, individualTime))
@@ -94,10 +114,9 @@ function runInstances()
   
 	writeFile("Resultados3.csv", resultados, ",")
   
-  end
+end
 
-
-  runInstances()
+runInstances()
 
 
 # function - pr 

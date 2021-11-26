@@ -3,6 +3,8 @@ module Heuristica
 using Solution, Profile
 export ILS, iteracoes_ILS
 
+const epsilon = 0.001 
+
 struct InsertionInfo
 	noInserido::Int64
 	posicaoInsercao::Int64
@@ -71,8 +73,8 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 	
 	tamanho::Int64 = length(caminho)
 
-	melhor_custo::Float64= custo_Corrente
-	no_final_A::Int64= 0
+	melhor_custo::Float64 = custo_Corrente
+	no_final_A::Int64 = 0
 	no_final_B::Int64 = 0
 
 	for no_A = 2:tamanho-2
@@ -113,16 +115,24 @@ function swap(solucao::Solucao)::Bool  # Função de troca de posição
 			custo_Adicionado = custo_Adicionado_B + custo_Adicionado_A 
 			custo = custo_Corrente + custo_Adicionado - custo_Removido
 
-			if(custo < melhor_custo)
+			if(custo + epsilon < melhor_custo)
 				melhor_custo = custo
 				no_final_A = no_A
 				no_final_B = no_B
+
+				#println("Melhor custo: ", melhor_custo)
+				#println("No final A: ", no_final_A)
+				#println("No final B: ", no_final_B)
+				
 			end
 		end
 	end
 
-	
-	if(melhor_custo < custo_Corrente)
+	#println("Validar Melhor custo: ", melhor_custo)
+	#println("Validar No final A: ", no_final_A)
+	#println("Validar No final B: ", no_final_B)
+
+	if(melhor_custo + epsilon < custo_Corrente)
 		swapVertices(solucao, no_final_A, no_final_B)
 		return true
 	end
@@ -140,29 +150,23 @@ function busca_2opt(solucao::Solucao)::Bool
 	p1::Int64 = 0 
 	p2::Int64 = 0 
 
-	# 
 
 	for node_inicial =2:length(caminho)-1 
 		for node_final = node_inicial+1:length(caminho)-1 
 
 			custo_Adicionado::Float64 = 0 
 			custo_Removido::Float64 = 0 
-		
-			for n = node_inicial:node_final+1 
-				custo_Removido += distancia[caminho[n-1],caminho[n]] 
-			end 
-
-			for n = node_inicial+1:node_final							   # Nesse caso tem a "inversão" 
-				custo_Adicionado += distancia[caminho[n],caminho[n-1]] 
-
-			end 
 
 			custo_Adicionado += distancia[caminho[node_inicial],caminho[node_final+1]] # Calculo do extremo inicial 
 			custo_Adicionado += distancia[caminho[node_inicial-1],caminho[node_final]] # Calculo do extremo final 
 
+			custo_Removido += distancia[caminho[node_inicial-1],caminho[node_inicial]]
+			custo_Removido += distancia[caminho[node_final],caminho[node_final+1]]
+
+
 			custo::Float64 = custo_Corrente + custo_Adicionado - custo_Removido 
 
-			if(custo < melhor_custo) 
+			if(custo + epsilon < melhor_custo) 
 				p1 = node_inicial 
 				p2 = node_final 
 				melhor_custo = custo 
@@ -170,7 +174,7 @@ function busca_2opt(solucao::Solucao)::Bool
 		end 
 	end 
 
-	if (melhor_custo < custo_Corrente) 
+	if (melhor_custo + epsilon < custo_Corrente) 
 		reverseSegment(solucao, p1, p2)
 		return true
 	end 
@@ -180,12 +184,12 @@ end
 
 function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção (1, 2 ou 3) 
 
-	caminho::Vector{Int64} = solucao.caminho			#---dúvida
-	distancia::Array{Float64, 2} = solucao.dist			#---dúvida
-	custo_Corrente::Float64 = solucao.custo		#---dúvida
-	melhor_custo::Float64 = custo_Corrente		#---dúvida
-	melhor_Inicio::Int64 = 0					#---dúvida	
-	melhor_Destino::Int64 = 0 					#---dúvida
+	caminho::Vector{Int64} = solucao.caminho			
+	distancia::Array{Float64, 2} = solucao.dist			
+	custo_Corrente::Float64 = solucao.custo		
+	melhor_custo::Float64 = custo_Corrente		
+	melhor_Inicio::Int64 = 0					
+	melhor_Destino::Int64 = 0 				
 
 	for origem =2:length(caminho)-K
 
@@ -209,7 +213,7 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 			
 			custo = custo_Corrente + custo_Adicionado - custo_Removido
 
-			if(custo < melhor_custo)
+			if(custo + epsilon < melhor_custo)
 				melhor_custo = custo
 				melhor_Inicio = origem
 				melhor_Destino = destino
@@ -229,7 +233,7 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 
 			custo = custo_Corrente + custo_Adicionado - custo_Removido
 
-			if(custo < melhor_custo)
+			if(custo + epsilon < melhor_custo)
 				melhor_custo = custo
 				melhor_Inicio = origem
 				melhor_Destino = destino
@@ -238,7 +242,7 @@ function orOpt(solucao::Solucao, K::Int64)::Bool    # K é o tamanho da seção 
 	end
 		
 
-	if (melhor_custo < custo_Corrente)
+	if (melhor_custo + epsilon < custo_Corrente)
 		moveSegment(solucao, melhor_Inicio, melhor_Destino, K)
 		return true
 	end
@@ -281,7 +285,7 @@ end
 
 function Buscalocal(solucao::Solucao)::Bool    #---dúvida (Verificar se o retorno de fato é assim)    # Consolidação dos movimentos e do algoritmo em si!
 
-	vetor::Vector{Int64} = [1,2,3,4,5]
+	vetor::Vector{Int64} = [1,2,3,4,5]		#[1,2,3,4,5]
 
 	improvement::Bool = false
 
@@ -307,6 +311,7 @@ function Buscalocal(solucao::Solucao)::Bool    #---dúvida (Verificar se o retor
 
 		if improvement
 			vetor = [1,2,3,4,5]
+
 		else
 			splice!(vetor, a)
 		end
@@ -324,27 +329,33 @@ function ILS(distancias::Array{Float64,2}, maxIter::Int64, maxIter_localsearch::
 
     #println("maxIter: ", maxIter)
 
+	contador_A = 0
+	contador_B = 0
+
 	for i = 1:maxIter 
 		
 		solucao::Solucao = Construcao(distancias)	##---dúvida        # gera um caminho inicial que será utilizado na busca local
 		best::Solucao = copySolution(solucao)			# copia o vetor da solução, e o "deepcopy" para mudar o objeto que tá sendo apontado
-        
+		contador_B = 0
+
+		contador_A += 1
         #println("Solucao teste: ", solucao)
         #println("best: ", best)
 
 		iterIls::Int64 = 1						# 1 : número máximo de interações
 		
+		
 		while iterIls <= maxIter_localsearch
 			
 			Buscalocal(solucao)
 			
-			if solucao.custo < best.custo		# nesse passo, depois da busca local, ele vai pegar o melhor resultado e atribuir como best 
+			if solucao.custo + epsilon < best.custo		# nesse passo, depois da busca local, ele vai pegar o melhor resultado e atribuir como best 
 				best = solucao
 				iterIls = 1						# se for encontrado uma melhor solução do que atual, reinicia o LOOP	
 			end
 			
             #println("CUSTO TESTE: ", best.custo)
-
+			contador_B += 1
 			solucao = perturbacao(best)			# aplica a perturbacao no best e roda mais um laço do while
 			#println("caminho: ", solucao.caminho)
             #println("custo: ", solucao.custo)
@@ -352,15 +363,21 @@ function ILS(distancias::Array{Float64,2}, maxIter::Int64, maxIter_localsearch::
             iterIls += 1						# isso indica que no momento que iterIls = maxIterIls, o laço vai ser quebrado
 		end
 		
-		if best.custo < bestOfAll.custo
+		if best.custo + epsilon < bestOfAll.custo
 			bestOfAll = best
             #println("CUSTO BESTOFFALL: ", bestOfAll.custo)
 
 		end
-        #println("CUSTO BEST.CUSTO: ", best.custo)
+        println("CUSTO BEST.CUSTO: ", best.custo)
 	end
-    #println("Caminho final é: ", bestOfAll)
+
+	#println("Contador A: ", contador_A)
+
+	#println("Contador b : ", contador_B)
+
+	#println("Caminho final é: ", bestOfAll.custo)
 	return bestOfAll
+
 	
 end
 
