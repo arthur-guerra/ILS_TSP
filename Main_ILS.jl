@@ -1,3 +1,9 @@
+# @file Main AG.jl
+
+# @author Arthur Leandro Guerra Pires
+
+# Contact: a.guerrapires@hotmail.com
+
 push!(LOAD_PATH, pwd())
 using Leitor, Heuristica, Extractor, PrettyTables, Solution, Writer
   
@@ -82,7 +88,7 @@ end
 function runInstances()
   
 	instances = filterInstances()
-	ok = [1]
+	ok = [2]
 	resultados = []
   
 	i = 0
@@ -103,7 +109,7 @@ function runInstances()
 		#pretty_table(matrix)
 	  end=#
 
-	  for k = 1:1
+	  for k = 1:2
 		individualTime = @elapsed solution::Solucao= ILS(matrix, 50, iteracoes_ILS(matrix))
 		println("Custo: ", solution.custo, " Tempo: ", round.(individualTime, digits=3), " s")
 		push!(resultados, Result(instance.name, k, solution.custo, individualTime))
@@ -112,7 +118,7 @@ function runInstances()
 	  println("------------------------------")
 	end
   
-	writeFile("Resultados3.csv", resultados, ",")
+	writeFile("Resultados3.csv", resultados, ";")
   
 end
 
