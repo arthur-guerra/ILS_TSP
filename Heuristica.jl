@@ -367,7 +367,7 @@ function ILS(distancias::Array{Float64,2}, maxIter::Int64, maxIter_localsearch::
             #println("CUSTO BESTOFFALL: ", bestOfAll.custo)
 
 		end
-        println("CUSTO BEST.CUSTO: ", best.custo)
+        #println("CUSTO BEST.CUSTO: ", best.custo)
 	end
 
 	#println("Caminho final é: ", bestOfAll.custo)

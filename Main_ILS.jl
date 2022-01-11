@@ -88,7 +88,25 @@ end
 function runInstances()
   
 	instances = filterInstances()
-	ok = [2]
+	
+	#ok  = [3]
+
+	ok = [5]
+	
+	#for i = 46:46
+		#push!(ok, i)
+	#end
+	
+
+	#ok = [ ]
+
+	#ok = [31,32,33,34,35,36,37,38,39,40,41,42,43]  # tão ok
+	#ok = [21, 22, 23,24, 25, 26, 27, 28, 29] # tão ok
+
+	#ok : 47:58 
+
+	#ok : 62:68
+
 	resultados = []
   
 	i = 0
@@ -109,16 +127,16 @@ function runInstances()
 		#pretty_table(matrix)
 	  end=#
 
-	  for k = 1:2
+	  for k = 1:10
 		individualTime = @elapsed solution::Solucao= ILS(matrix, 50, iteracoes_ILS(matrix))
 		println("Custo: ", solution.custo, " Tempo: ", round.(individualTime, digits=3), " s")
-		push!(resultados, Result(instance.name, k, solution.custo, individualTime))
+		push!(resultados, Result(instance.name, k, solution.custo, round.(individualTime, digits=3)))
 		println("Solucao: ", solution.custo)
 	  end
 	  println("------------------------------")
 	end
   
-	writeFile("Resultados3.csv", resultados, ";")
+	writeFile("Resultados4.csv", resultados, ";")
   
 end
 
