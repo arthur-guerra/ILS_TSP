@@ -224,13 +224,13 @@ function distanceExplicitUpperRow(file::IOStream, instanceData::InstanceData)::A
 		distArray::Vector{String} = split(line, " ")
 		filter!(value::String -> value != "", distArray)
 
-		for i = lineCounter+1 : length(distArray)
+		for i = 1 : length(distArray)
 			value::Float64 = parse(Float64, distArray[i])
 			matrix[lineCounter, lineCounter + i] = value
 			matrix[lineCounter + i, lineCounter] = value
 		end
 
-		if lineCounter == instanceData.dimension
+		if lineCounter == instanceData.dimension-1
 			return matrix
 		end
 	end

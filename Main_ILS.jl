@@ -85,13 +85,14 @@ function Simetria(matrix::Array{Float64,2})
 	return true
 end
 
+
 function runInstances()
   
 	instances = filterInstances()
 	
 	#ok  = [3]
 
-	ok = [5]
+	ok = [10]
 	
 	#for i = 46:46
 		#push!(ok, i)
