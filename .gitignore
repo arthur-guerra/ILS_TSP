@@ -4,3 +4,4 @@ Anotations.zip
 *.csv
 !instancias.csv
 !Resultados_ILS.csv
+!Custo_Tempo_ILS.csv

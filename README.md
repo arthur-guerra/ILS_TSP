@@ -5,11 +5,11 @@ Essa implementação foi referente ao algoritmo Iterated Local Search (**ILS**),
 Para rodar, execute: 
 
 ```
-$ julia
-julia$ include("Main_ILS.jl")
+julia>
+julia> include("Main_ILS.jl")
 ```
 ou
 
 ```
-$ julia Main_ILS.jl
+julia> Main_ILS.jl
 ```
