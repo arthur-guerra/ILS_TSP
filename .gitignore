@@ -3,3 +3,4 @@ Anotations.zip
 .vscode/**
 *.csv
 !instancias.csv
+!Resultados_ILS.csv
